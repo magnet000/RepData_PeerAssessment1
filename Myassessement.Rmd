@@ -44,11 +44,11 @@ ggplot(subset(datax, datax$steps !="NA"), aes(x=steps))+
 
 To calculate the mean and the median:
 ```{r meanmedian, result="hide"}
-mean <- mean(datax$steps, na.rm = T)
-median <- median(datax$steps, na.rm = T)
+mean1 <- mean(datax$steps, na.rm = T)
+median1 <- median(datax$steps, na.rm = T)
 ```
 
-The mean is `r mean` and the median is `r median`.
+The mean is `r mean1` and the median is `r median1`.
 
 
 ## What is the average daily activity pattern?
@@ -64,7 +64,7 @@ To make the time-series plot, note that NA's are omitted in this function:
 ggplot2::ggplot(subset(datay, datay$steps != "NA"), aes(x=steps, y=date))+
         geom_line(color="steelblue", size= 1)+
         theme_bw()+
-        labs(x="Steps", y="Date (days)", title= "Time series of the 5-minute interval and the average number of steps taken")
+        labs(x="Steps", y="Date (days)", title= "Time series of the average number of steps taaken")
         
 ```
 
@@ -111,58 +111,71 @@ ggplot(data12, aes(x=steps))+
 
 To calculate the mean and the median:
 ```{r meanmedian2, result="hide"}
-mean2 <- round(mean(data12$steps, na.rm = T),3)
-median2 <- round(median(data12$steps, na.rm = T),3)
+mean2 <- mean(data12$steps, na.rm = T)
+median2 <- median(data12$steps, na.rm = T)
 ```
 
-The mean in the original data omitting the NA's was `r mean` and the median was `r median`.
+The mean in the original data omitting the NA's was `r mean1` and the median was `r median1`.
 
 The mean in the imputated data is `r mean2` and the median is `r median2`. 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Only the median has changed, that is to say that the first 50% of days acomulate more steps than did the first 50% of days in the original data (which maskes sense as some observations were omitted due to NA).
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+We were asked to make a panel plot that consissts on two different time series plots of average across weekday days and the other for weekend days.
+```{r}
+data1$week <- weekdays(data1$date)
+data1$week <- as.factor(ifelse(data1$week %in% c("Saturday", "Sunday"), "Weekend", "Weekday"))
+```
+
+```{r}
+x <- aggregate(steps~interval + week, x, mean, na.rm = TRUE)
+```
+
+```{r timeseries2, warning=FALSE}
+ggplot2::ggplot(x, aes(x=interval, y=steps, color= week))+
+        geom_line(size= 1)+
+        theme_bw()+
+        labs(x="Steps", y="Average number of steps", title= "Average daily steps by type of day", color= "Type of day") +
+        facet_grid(week~.)
+        
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
