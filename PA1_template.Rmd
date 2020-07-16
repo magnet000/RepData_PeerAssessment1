@@ -1,24 +1,167 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
+title: 'Reproducible Research: Peer Assessment 1'
+output:
   html_document:
-    keep_md: true
+    keep_md: yes
 ---
 
-
 ## Loading and preprocessing the data
+Firs of all in an analysis we have to load the data and make the necessary changes on it in order to suit well our analysis.
 
+```{r}
+data <- read.csv("activity.csv", sep = ",")
+```
+
+We can take a look on the first rows of the data.frame so we can see how our data looks like:
+```{r}
+str(data)
+```
+
+As we can see, the variable that corresponds to the time is in factor class, so we need to change that to the proper time class so it is more useful for our analysis.
+```{r readingdata}
+data$date <- as.Date(data$date, "%Y-%m-%d")
+```
 
 
 ## What is mean total number of steps taken per day?
 
+In order to ge this part done we have to make a histogram and report the mean and median of those totals.
+
+First of all, in order to calculate the total number of stpes per day I saved in a new data frame the data grouped by day and then summed the steps for that group:
+```{r groupingdata, message=F}
+library(dplyr)
+datax <- data %>% group_by(date) %>% summarize(steps=sum(steps))
+```
+
+The histogram has been built as following, note that NA's are omitted in this code:
+```{r histogram}
+library(ggplot2)
+ggplot(subset(datax, datax$steps !="NA"), aes(x=steps))+
+        geom_histogram(bins = 10, fill="steelblue")+
+        theme_bw() +
+        labs(x="Number of steps per day", y="Frequency", title ="Total steps per day in a period between 2012/10/01 and 2012/11/30")
+```
+
+To calculate the mean and the median:
+```{r meanmedian, result="hide"}
+mean <- mean(datax$steps, na.rm = T)
+median <- median(datax$steps, na.rm = T)
+```
+
+The mean is `r mean` and the median is `r median`.
 
 
 ## What is the average daily activity pattern?
 
+First of all we need to average the steps taken per days.
+```{r message=F, average}
+library(dplyr)
+datay <- data %>%  group_by(date) %>%  summarise(steps=mean(steps, na.rm=T)) 
+```
 
+To make the time-series plot, note that NA's are omitted in this function:
+```{r timeseries, warning=FALSE}
+ggplot2::ggplot(subset(datay, datay$steps != "NA"), aes(x=steps, y=date))+
+        geom_line(color="steelblue", size= 1)+
+        theme_bw()+
+        labs(x="Steps", y="Date (days)", title= "Time series of the 5-minute interval and the average number of steps taken")
+        
+```
+
+To calculate what day contains the maximum average:
+```{r results="hide", maximum, warning=F, message=FALSE}
+library(dplyr)
+max <- datay %>% slice(steps %>% which.max)
+day <- max[,"date"]
+```
+
+The maximum averaged steps per day was on `r day`.
 
 ## Imputing missing values
+
+In order to get the total number of NA's:
+```{r}
+totalNA <- sum(is.na(data$steps))
+```
+
+The total of NA contained in steps variable is `r totalNA`.
+
+In order to fill this NA's I will use the mean of each interval:
+```{r message=F, warning=FALSE}
+library(dplyr)
+dataz <- data %>% group_by(interval) %>% summarise(steps=mean(steps, na.rm=T))
+```
+
+As we got the mean for each interval, I'll introduce the mean this mean as the step value for each NA value in the new data set.
+```{r warning=F}
+data1 <- data
+imputed_steps <- dataz$steps[match(data1$interval, dataz$interval)]
+data1 <- transform(data1, steps = ifelse(is.na(data1$steps), imputed_steps, data1$steps))
+```
+
+Now, we can recalculate the histogram of steps taken per day:
+```{r histogram2}
+library(ggplot2)
+data12 <- data1 %>% group_by(date) %>% summarise(steps=sum(steps))
+ggplot(data12, aes(x=steps))+
+        geom_histogram(bins = 10, fill="steelblue")+
+        theme_bw() +
+        labs(x="Number of steps per day", y="Frequency", title ="Total steps per day in a period between 2012/10/01 and 2012/11/30")
+```
+
+To calculate the mean and the median:
+```{r meanmedian2, result="hide"}
+mean2 <- round(mean(data12$steps, na.rm = T),3)
+median2 <- round(median(data12$steps, na.rm = T),3)
+```
+
+The mean in the original data omitting the NA's was `r mean` and the median was `r median`.
+
+The mean in the imputated data is `r mean2` and the median is `r median2`. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
