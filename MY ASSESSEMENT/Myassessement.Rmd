@@ -9,7 +9,7 @@ output:
 Firs of all in an analysis we have to load the data and make the necessary changes on it in order to suit well our analysis.
 
 ```{r}
-data <- read.csv("activity.csv", sep = ",")
+data <- read.csv("/Users/IMAN/Reproducible Research/activity.csv", sep = ",")
 ```
 
 We can take a look on the first rows of the data.frame so we can see how our data looks like:
@@ -56,15 +56,15 @@ The mean is `r mean1` and the median is `r median1`.
 First of all we need to average the steps taken per days.
 ```{r message=F, average}
 library(dplyr)
-datay <- data %>%  group_by(date) %>%  summarise(steps=mean(steps, na.rm=T)) 
+datay <- data %>%  group_by(interval) %>%  summarise(steps=mean(steps, na.rm=T)) 
 ```
 
 To make the time-series plot, note that NA's are omitted in this function:
 ```{r timeseries, warning=FALSE}
-ggplot2::ggplot(subset(datay, datay$steps != "NA"), aes(x=steps, y=date))+
+ggplot2::ggplot(subset(datay, datay$steps != "NA"), aes(x=interval, y=steps))+
         geom_line(color="steelblue", size= 1)+
         theme_bw()+
-        labs(x="Steps", y="Date (days)", title= "Time series of the average number of steps taaken")
+        labs(x="Interval", y="Average steps", title= "Time series of the average number of steps taken for intervals")
         
 ```
 
@@ -72,10 +72,10 @@ To calculate what day contains the maximum average:
 ```{r results="hide", maximum, warning=F, message=FALSE}
 library(dplyr)
 max <- datay %>% slice(steps %>% which.max)
-day <- max[,"date"]
+interval <- max[,"interval"]
 ```
 
-The maximum averaged steps per day was on `r day`.
+The maximum averaged steps per day was in `r interval` interval.
 
 ## Imputing missing values
 
